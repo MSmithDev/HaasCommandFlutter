@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:haas_command/MyRouteObserver.dart';
 import 'addNewMahcineRoute.dart';
 import "database_helpers.dart";
 
@@ -54,9 +55,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: [routeObserver],
+      navigatorObservers: [MyRouteObserver()],
       routes: {
-        'addNewMachineRoute': (context) => RouteAwareWidget('addNewMachineRoute', child: AddNewMachinePage()),
+        'addNewMachineRoute': (context) => AddNewMachinePage(),
+
       },
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -157,12 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddNewMachinePage()),
-          );
-        },
+        onPressed: () => Navigator.of(context).pushNamed('addNewMachineRoute'),
+
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

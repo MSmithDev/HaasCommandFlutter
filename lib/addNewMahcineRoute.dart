@@ -2,20 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 import 'package:validators/sanitizers.dart';
 import "database_helpers.dart";
+import 'main.dart';
 
 class AddNewMachinePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final appTitle = 'Add new machine';
+  _AddNewMachinePageState createState() => _AddNewMachinePageState();
+  // Widget build(BuildContext context) {
+  //   final appTitle = 'Add new machine';
+  //
+  //   return Scaffold(
+  //       appBar: AppBar(
+  //         title: Text(appTitle),
+  //       ),
+  //       body: SecondRoute(),
+  //   );
+  // }
+}
 
+
+
+class _AddNewMachinePageState extends State<AddNewMachinePage> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    print('didPush');
+  }
+
+  @override
+  void didPopNext() {
+    print('didPopNext');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(appTitle),
-        ),
-        body: SecondRoute(),
+      appBar: AppBar(
+      title: Text("Add New Machine"),
+      ),
+             body: SecondRoute(),
     );
   }
+
 }
+
+
 
 class SecondRoute extends StatefulWidget {
   @override
@@ -127,7 +168,7 @@ class MyCustomFormState extends State<SecondRoute> {
                   onPressed: () {
 
                     //Todo Change route to home
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
 
                   },
                   child: Text('Cancel'),
