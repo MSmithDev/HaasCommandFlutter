@@ -1,17 +1,63 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'addNewMahcineRoute.dart';
+import "database_helpers.dart";
+
+
+// Register the RouteObserver as a navigation observer.
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 void main() {
+
   runApp(MyApp());
 }
 
+class RouteAwareWidget extends StatefulWidget {
+  State<RouteAwareWidget> createState() => RouteAwareWidgetState();
+}
+
+// Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
+class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    // Route was pushed onto navigator and is now topmost route.
+    print("Was pushed");
+  }
+
+  @override
+  void didPopNext() {
+    // Covering route was popped off the navigator.
+    print("did pop next");
+  }
+
+  @override
+  Widget build(BuildContext context) => MyHomePage(title: 'Haas Command Machines');
+
+}
+
 class MyApp extends StatelessWidget {
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [routeObserver],
+      routes: {
+        'addNewMachineRoute': (context) => RouteAwareWidget('addNewMachineRoute', child: AddNewMachinePage()),
+      },
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -53,9 +99,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   int _counter = 0;
-
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -69,10 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-
-
-
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -106,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
+
               'You have pushed the button this many times:',
             ),
             Text(
@@ -117,13 +158,25 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Test()),);},
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddNewMachinePage()),
+          );
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+}
+_read() async {
+  DatabaseHelper helper = DatabaseHelper.instance;
+  int rowId = 111;
+  MachineData md = await helper.queryMachineData(rowId);
+  if (md == null) {
+    print('read row $rowId: empty');
+  } else {
+    print('read row $rowId: ${md.sn} ${md.nickname} ${md.connectionName} ${md.port} ${md.model} ${md.softwareVersion}');
   }
 }

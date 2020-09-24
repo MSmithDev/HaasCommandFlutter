@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 import 'package:validators/sanitizers.dart';
+import "database_helpers.dart";
 
-class Test extends StatelessWidget {
+class AddNewMachinePage extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
-    final appTitle = 'Form Validation Demo';
+    final appTitle = 'Add new machine';
 
-    return MaterialApp(
-      title: appTitle,
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text(appTitle),
         ),
         body: SecondRoute(),
-      ),
     );
   }
 }
@@ -100,6 +98,24 @@ class MyCustomFormState extends State<SecondRoute> {
                       // If the form is valid, display a Snackbar.
                       Scaffold.of(context).showSnackBar(
                           SnackBar(content: Text('Processing Data')));
+
+                      ////////
+
+                      _save() async {
+                        MachineData md = MachineData();
+                        md.sn = 111;
+                        md.nickname = "Test";
+                        md.connectionName = "testConn";
+                        md.port = 123;
+                        md.model = "VF0";
+                        md.softwareVersion = "SoftVer";
+                        DatabaseHelper helper = DatabaseHelper.instance;
+                        int id = await helper.insertMachineData(md);
+                        print('inserted row: $id');
+                      }
+                      _save();
+
+                      ////////
                     }
                   },
                   child: Text('Add'),
@@ -111,7 +127,7 @@ class MyCustomFormState extends State<SecondRoute> {
                   onPressed: () {
 
                     //Todo Change route to home
-
+                    Navigator.pop(context);
 
                   },
                   child: Text('Cancel'),
