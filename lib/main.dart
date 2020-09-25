@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:haas_command/MyRouteObserver.dart';
+import 'package:haas_command/routes/editMachineRoute.dart';
 import 'routes/addNewMahcineRoute.dart';
 import 'helpers/database_helpers.dart';
 import "RouteAwareWidget.dart";
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [routeObserver, middleware],
       routes: {
         'addNewMachineRoute': (context) => AddNewMachinePage(),
+        'editMachine': (context) => EditMachine(),
 
       },
       title: 'Flutter Demo',
@@ -131,6 +133,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware{
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -161,13 +164,21 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware{
                   caption: 'Edit',
                   color: Colors.black45,
                   icon: Icons.edit,
-                  onTap: () => print('Edit! ${mdl[i]}'),
+                  onTap: () => Navigator.pushNamed(context,'editMachine', arguments: mdl[i]).then((value) {
+                    _test();
+                    //_test();
+                  }),
                 ),
                 IconSlideAction(
                   caption: 'Delete',
                   color: Colors.red,
                   icon: Icons.delete,
-                  onTap: () => print('Delete'),
+                  onTap: () {
+                    print('attempt to delete ${mdl[i]}');
+
+                    DatabaseHelper.instance.removeMachine(mdl[i]);
+                    _test();
+                  },
                 ),
               ],
 

@@ -4,6 +4,7 @@ import 'package:validators/sanitizers.dart';
 import '../helpers/database_helpers.dart';
 import '../main.dart';
 import 'dart:math';
+
 class AddNewMachinePage extends StatefulWidget {
   @override
   _AddNewMachinePageState createState() => _AddNewMachinePageState();

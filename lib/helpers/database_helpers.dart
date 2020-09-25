@@ -129,6 +129,13 @@ class DatabaseHelper {
   }
 
 
+  Future<int> removeMachine(MachineData md) async {
+    Database db = await database;
+    print('removing ${md}');
+   return await db.delete(machineDataTable, where: '$columnSn = ?', whereArgs: [md.sn]);
+  }
+
+
 
 
 // TODO: queryAllWords()
