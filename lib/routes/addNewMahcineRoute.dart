@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 import 'package:validators/sanitizers.dart';
-import "database_helpers.dart";
-import 'main.dart';
-
+import '../helpers/database_helpers.dart';
+import '../main.dart';
+import 'dart:math';
 class AddNewMachinePage extends StatefulWidget {
   @override
   _AddNewMachinePageState createState() => _AddNewMachinePageState();
@@ -36,12 +36,12 @@ class _AddNewMachinePageState extends State<AddNewMachinePage> with RouteAware {
 
   @override
   void didPush() {
-    print('didPush');
+    //print('didPush');
   }
 
   @override
   void didPopNext() {
-    print('didPopNext');
+    //print('didPopNext');
   }
 
   @override
@@ -68,6 +68,10 @@ class SecondRoute extends StatefulWidget {
 class MyCustomFormState extends State<SecondRoute> {
   final _formKey = GlobalKey<FormState>();
 
+  final nicknameController = TextEditingController();
+  final hostController = TextEditingController();
+  final portController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
@@ -78,6 +82,7 @@ class MyCustomFormState extends State<SecondRoute> {
         children: <Widget>[
           TextFormField(
             decoration: InputDecoration(labelText: 'Nickname'),
+            controller: nicknameController,
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter a nickname';
@@ -89,6 +94,7 @@ class MyCustomFormState extends State<SecondRoute> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: 'Machine IP/Hostname'),
+            controller: hostController,
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter Hostname or IP';
@@ -103,6 +109,7 @@ class MyCustomFormState extends State<SecondRoute> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: 'Machine Data Collect Port'),
+            controller: portController,
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter MDC port number';
@@ -144,17 +151,19 @@ class MyCustomFormState extends State<SecondRoute> {
 
                       _save() async {
                         MachineData md = MachineData();
-                        md.sn = 111;
-                        md.nickname = "Test";
-                        md.connectionName = "testConn";
-                        md.port = 123;
-                        md.model = "VF0";
+                        md.sn = Random().nextInt(1000);
+                        md.nickname = nicknameController.text;
+                        md.connectionName = hostController.text;
+                        md.port = int.parse(portController.text);
+                        md.model = "VF03";
                         md.softwareVersion = "SoftVer";
                         DatabaseHelper helper = DatabaseHelper.instance;
                         int id = await helper.insertMachineData(md);
                         print('inserted row: $id');
                       }
-                      _save();
+                      _save().then((value) => {
+                        Navigator.pop(context, true)
+                      });
 
                       ////////
                     }
@@ -168,7 +177,14 @@ class MyCustomFormState extends State<SecondRoute> {
                   onPressed: () {
 
                     //Todo Change route to home
-                    Navigator.of(context).pop();
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => MyHomePage(title: 'Haas Command Machines'),
+                    //   ),
+                    // );
+                    Navigator.pop(context,true);
+                    //Navigator.of(context).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
 
                   },
                   child: Text('Cancel'),

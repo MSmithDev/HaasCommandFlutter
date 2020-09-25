@@ -14,6 +14,7 @@ class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context));
+
   }
 
   @override
@@ -25,13 +26,13 @@ class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
   @override
   // Called when the current route has been pushed.
   void didPush() {
-    print('didPush ${widget.name}');
+   // print('didPush ${widget.name}');
   }
 
   @override
   // Called when the top route has been popped off, and the current route shows up.
   void didPopNext() {
-    print('didPopNext ${widget.name}');
+    //print('didPopNext ${widget.name}');
   }
 
   @override

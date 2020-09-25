@@ -1,53 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:haas_command/MyRouteObserver.dart';
-import 'addNewMahcineRoute.dart';
-import "database_helpers.dart";
+import 'routes/addNewMahcineRoute.dart';
+import 'helpers/database_helpers.dart';
+import "RouteAwareWidget.dart";
+import 'helpers/NavigatorMiddleware.dart';
 
 
+import 'dart:developer';
 // Register the RouteObserver as a navigation observer.
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+NavigatorMiddleware<PageRoute> middleware = NavigatorMiddleware<PageRoute>(
+  onPush: (route, previousRoute) {
+    log('we have push event');
+    ///if route is Y we should have some API call
+    ///
+    log('DO SOMETHING HERE');
+  },
+  onPop: (route, previousRoute) {
+    print("Current Route is: " + route.toString());
+  },
+);
+
+
+
 
 void main() {
 
   runApp(MyApp());
 }
 
-class RouteAwareWidget extends StatefulWidget {
-  State<RouteAwareWidget> createState() => RouteAwareWidgetState();
-}
 
-// Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
-class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context));
-  }
-
-  @override
-  void dispose() {
-    routeObserver.unsubscribe(this);
-    super.dispose();
-  }
-
-  @override
-  void didPush() {
-    // Route was pushed onto navigator and is now topmost route.
-    print("Was pushed");
-  }
-
-  @override
-  void didPopNext() {
-    // Covering route was popped off the navigator.
-    print("did pop next");
-  }
-
-  @override
-  Widget build(BuildContext context) => MyHomePage(title: 'Haas Command Machines');
-
-}
 
 class MyApp extends StatelessWidget {
 
@@ -55,7 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: [MyRouteObserver()],
+      navigatorObservers: [routeObserver, middleware],
       routes: {
         'addNewMachineRoute': (context) => AddNewMachinePage(),
 
@@ -82,7 +65,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatefulWidget  {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -100,7 +83,20 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with RouteAware{
+  List<MachineData> mdl;
+
+  @override
+  initState() {
+    super.initState();
+    _read().then((result) {
+    print("result: $result");
+    setState(() {
+      mdl = result;
+    });
+    });
+  }
+
   int _counter = 0;
   void _incrementCounter() {
     setState(() {
@@ -111,6 +107,20 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  void _test() {
+    _read().then((result) {
+      print("result: $result");
+      setState(() {
+        mdl = result;
+      });
+    });
+    // setState(() {
+    //   machineList.clear();
+    //   //updateMachines();
+    //
+    // });
   }
 
   @override
@@ -127,54 +137,123 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
+      body: ListView.builder(
+        itemCount: mdl == null ? 0 : mdl.length,
+        itemBuilder: (context, int i) =>
 
-              'You have pushed the button this many times:',
+            Slidable(
+              actionPane: SlidableDrawerActionPane(),
+              actionExtentRatio: 0.25,
+              child: Container(
+                color: Colors.white,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.indigoAccent,
+                    child: Text('${mdl[i].sn}'),
+                    foregroundColor: Colors.white,
+                  ),
+                  title: Text('${mdl[i].nickname}'),
+                  subtitle: Text('${mdl[i].connectionName}'),
+                ),
+              ),
+              actions: <Widget>[
+                IconSlideAction(
+                  caption: 'Edit',
+                  color: Colors.black45,
+                  icon: Icons.edit,
+                  onTap: () => print('Edit! ${mdl[i]}'),
+                ),
+                IconSlideAction(
+                  caption: 'Delete',
+                  color: Colors.red,
+                  icon: Icons.delete,
+                  onTap: () => print('Delete'),
+                ),
+              ],
+
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+
+
+
+            // Column(
+            //   children: [
+            //     new ListTile(
+            //       leading: new CircleAvatar(
+            //           child: Text(mdl[i].sn.toString())),
+            //       title: new Text(mdl[i].nickname),
+            //       subtitle: new Text(mdl[i].connectionName),
+            //       onTap: () {},
+            //       onLongPress: () {
+            //         print(
+            //           Text("Long Pressed"),
+            //         );
+            //       },
+            //     ),
+            //   ],
+            // ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).pushNamed('addNewMachineRoute'),
+        onPressed: () => Navigator.pushNamed(context,'addNewMachineRoute').then((value) {
+          _test();
+          //_test();
+        }),
 
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-
 }
-_read() async {
+Future<List> _read() async {
   DatabaseHelper helper = DatabaseHelper.instance;
   int rowId = 111;
-  MachineData md = await helper.queryMachineData(rowId);
-  if (md == null) {
-    print('read row $rowId: empty');
-  } else {
-    print('read row $rowId: ${md.sn} ${md.nickname} ${md.connectionName} ${md.port} ${md.model} ${md.softwareVersion}');
+  machineList.clear();
+  final md = await helper.queryAllMachines();
+  if (md != null) {
+    md.forEach((data) {
+      print('row ${data.sn}: ${data.nickname}');
+      machineList.add(data);
+    });
+  }
+  return machineList;
+}
+
+ updateMachines() async {
+  print("Updating machine list");
+  final res = await _read();
+  print("Done!");
+
+}
+
+var machineList = List<MachineData>();
+
+class DisplayListView extends StatefulWidget {
+  @override
+  _DisplayListViewState createState() => _DisplayListViewState();
+}
+
+class _DisplayListViewState extends State {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: machineList.length,
+      itemBuilder: (context, int i) =>
+          Column(
+            children: [
+              new ListTile(
+                leading: new CircleAvatar(
+                    child: Text(machineList[i].sn.toString())),
+                title: new Text(machineList[i].nickname),
+                subtitle: new Text(machineList[i].port.toString()),
+                onTap: () {},
+                onLongPress: () {
+                  print(
+                    Text("Long Pressed"),
+                  );
+                },
+              ),
+            ],
+          ),
+    );
   }
 }

@@ -117,6 +117,20 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<List<MachineData>> queryAllMachines() async {
+    Database db = await database;
+    List<Map> maps = await db.query(machineDataTable);
+    if (maps.length > 0) {
+      List<MachineData> md = [];
+      maps.forEach((map) => md.add(MachineData.fromMap(map)));
+      return md;
+    }
+    return null;
+  }
+
+
+
+
 // TODO: queryAllWords()
 // TODO: delete(int id)
 // TODO: update(Word word)
