@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
 import 'package:validators/sanitizers.dart';
@@ -83,7 +85,18 @@ class EditMachine extends StatelessWidget {
                     if (_formKey.currentState.validate()) {
                       // If the form is valid, display a Snackbar.
                       Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text('Processing Data')));
+                          SnackBar(content: Text('Testing: ${hostController.text} on ${portController.text}')));
+                      Socket.connect('${hostController.text}', int.parse(portController.text)).then((sock) {
+                        sock.writeln('?Q100');
+                        //Establish the onData, and onDone callbacks
+                        sock.listen((data) {
+                          print(new String.fromCharCodes(data).trim());
+                        },
+                            onDone: () {
+                              print("Done");
+                              sock.destroy();
+                            });
+                      });
                     }
                   },
                   child: Text('Test Connection'),
