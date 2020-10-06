@@ -7,7 +7,7 @@ import '../helpers/database_helpers.dart';
 import '../main.dart';
 import 'dart:math';
 import '../helpers/HaasMDC.dart';
-
+import '../helpers/Overlay_helpers.dart';
 
 class CommandPage extends StatefulWidget {
   @override
@@ -65,6 +65,9 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
     this.md = ModalRoute.of(context).settings.arguments;
     this.mdc = new HaasMDC(md.connectionName, md.port);
 
+    final overlay = LoadingOverlay.of(context);
+
+
     return Scaffold(
     appBar: AppBar(
       title: Text('Command'),
@@ -76,9 +79,23 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
       builder: (context, AsyncSnapshot<String> snapshot) {
         if(snapshot.hasData) {
           return Text(snapshot.data);
-        } else {
-          return CircularProgressIndicator();
-        }
+        }else if (snapshot.hasError){
+
+         return Text('ERROR has occored',textScaleFactor: 1.5,);
+        }else{
+          return Center(
+
+            child:SizedBox(
+              width: 100,
+              height: 100,
+              child: Column(
+
+                children: [
+                CircularProgressIndicator(),
+                Text('Connecting')],
+            ),
+            ),
+          );}
       },
     ),
     );
@@ -96,7 +113,8 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
     await Future.delayed(Duration(seconds: 5), () {
 
     });
-    return 'its done';
+    return Future.error("");
+
     //return 'its done';
   }
 }
