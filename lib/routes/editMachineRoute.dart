@@ -24,6 +24,7 @@ class EditMachine extends StatelessWidget {
     final nicknameController = TextEditingController(text: md.nickname);
     final hostController = TextEditingController(text: md.connectionName);
     final portController = TextEditingController(text: md.port.toString());
+
     print('MD ARGS : ${md.sn}');
     // Build a Form widget using the _formKey created above.
     return Scaffold(

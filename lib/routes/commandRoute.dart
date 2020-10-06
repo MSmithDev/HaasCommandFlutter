@@ -6,6 +6,8 @@ import 'package:validators/sanitizers.dart';
 import '../helpers/database_helpers.dart';
 import '../main.dart';
 import 'dart:math';
+import '../helpers/HaasMDC.dart';
+
 
 class CommandPage extends StatefulWidget {
   @override
@@ -23,6 +25,9 @@ class CommandPage extends StatefulWidget {
 }
 
 class _CommandPageState extends State<CommandPage> with RouteAware {
+  MachineData md;
+  HaasMDC mdc;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -31,7 +36,7 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
 
   @override
   void dispose() {
-    print('Command dispose');
+    print('Command dispose ${md.nickname} ${md.connectionName}');
     //todo disconnect on dispose
 
     routeObserver.unsubscribe(this);
@@ -41,6 +46,7 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
   @override
   void didPush() {
     print('Command didPush');
+
     //todo connect to passed machine
   }
 
@@ -56,7 +62,27 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    this.md = ModalRoute.of(context).settings.arguments;
+    this.mdc = new HaasMDC(md.connectionName, md.port);
+
     return Scaffold(
+    appBar: AppBar(
+      title: Text('Command'),
+    )
+    ,
+    body:
+      FutureBuilder<String>(
+      future: stuff(),
+      builder: (context, AsyncSnapshot<String> snapshot) {
+        if(snapshot.hasData) {
+          return Text(snapshot.data);
+        } else {
+          return CircularProgressIndicator();
+        }
+      },
+    ),
+    );
+    Scaffold(
 
       appBar: AppBar(
 
@@ -64,6 +90,14 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
       ),
 
     );
+  }
+  
+  Future<String> stuff() async {
+    await Future.delayed(Duration(seconds: 5), () {
+
+    });
+    return 'its done';
+    //return 'its done';
   }
 }
 
