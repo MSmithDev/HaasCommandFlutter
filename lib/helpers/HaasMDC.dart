@@ -1,19 +1,27 @@
-
-
-
-
-
-
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:validators/validators.dart';
+import 'package:async/async.dart';
+
+extension StringExtensions on String {
+  String removeWhitespace() {
+    return this.replaceAll(' ', '');
+  }
+}
 
 class HaasMDC {
 
   Socket sock;
+  String host;
+  int port;
 
-  HaasMDC(Socket socket){
-    this.sock = socket;
+  Stream<String> tests;
+  StreamQueue<String> events;
+
+  HaasMDC(String host, int port){
+  this.host = host;
+  this.port = port;
   }
 
   parseQ(String data) {
@@ -21,36 +29,76 @@ class HaasMDC {
   }
 
 
-  Future<String> queryQ(String qCmd, [String arg]) {
-    int didSucceed = 0;
-    //Make sure socket is open
+  Future<bool> connect() async {
+  try {
+    sock = await Socket.connect(host, port, timeout: Duration(seconds: 5));
+  } catch (e) {
+    print('HaasMDC Socket error: $e');
+    return false;
+  }
     if(sock != null) {
-      // Write cmd to socket
-      sock.writeln(qCmd);
-    String ress;
-      //wait for res
-      sock.listen((data) {
-        String res = new String.fromCharCodes(data).trim();
-        if (res != null) {
-          print("Socket got: " + res);
-          if (isNumeric(res)) {
-            didSucceed = 1;
-          }
-          else {
-            didSucceed = 2;
-          }
-        }
-        while (didSucceed == 0) {
-          Future.delayed(Duration(milliseconds: 100));
-        }
-
-      });
-    return null;
+      tests = Utf8Decoder().bind(sock).transform(LineSplitter());
+      events = StreamQueue<String>(tests);
+      return true; //<------ on connect return true to connect()
     }
-    else return null;
-
+    else {
+      print('HaasMDC Socket is null!');
+      return false;
+    }
   }
 
 
 
+  Future<String>sendRecv(String cmd) async {
+    sock.writeln(cmd);
+    return await events.next;
+  }
+
+
+  double parseToolOffset(String res){
+
+    return double.parse(res.removeWhitespace().split(',')[1]);
+  }
+
+  Future<List<ToolOffset>> getToolOffsets(int maxTools) async {
+    List<ToolOffset> offsets = [];
+    for(int i = 0; i < maxTools; i++) {
+      ToolOffset tool = new ToolOffset();
+      tool.toolNumber = i + 1;
+      sock.writeln('?Q600');
+      tool.x = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.y = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.z = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.a = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.b = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.c = parseToolOffset(await events.next);
+      sock.writeln('?Q600');
+      tool.p = parseToolOffset(await events.next);
+      offsets.add(tool);
+    }
+    return offsets;
+  }
+
+  printToolOffsets(List<ToolOffset> offsets) {
+    for (var tool in offsets) {
+      print('Tool: ${tool.toolNumber} X: ${tool.x} Y: ${tool.y} Z: ${tool.z} A: ${tool.a} B: ${tool.b} C: ${tool.c} P: ${tool.p}');
+    }
+  }
+
+
+  //Add streamable widget builders
+
+
+
 }
+
+class ToolOffset {
+  int toolNumber;
+  double x,y,z,a,b,c,p;
+}
+
