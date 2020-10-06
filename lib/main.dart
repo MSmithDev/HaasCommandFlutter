@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:haas_command/MyRouteObserver.dart';
 import 'package:haas_command/routes/editMachineRoute.dart';
 import 'routes/addNewMahcineRoute.dart';
+import 'routes/commandRoute.dart';
 import 'helpers/database_helpers.dart';
 import "RouteAwareWidget.dart";
 import 'helpers/NavigatorMiddleware.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
       routes: {
         'addNewMachineRoute': (context) => AddNewMachinePage(),
         'editMachine': (context) => EditMachine(),
+        'commandPage': (context) => CommandPage(),
 
       },
       title: 'Flutter Demo',
@@ -148,6 +150,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware{
               actionPane: SlidableDrawerActionPane(),
               actionExtentRatio: 0.25,
               child: Container(
+
                 color: Colors.white,
                 child: ListTile(
                   leading: CircleAvatar(
@@ -157,6 +160,14 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware{
                   ),
                   title: Text('${mdl[i].nickname}'),
                   subtitle: Text('${mdl[i].connectionName}'),
+                  trailing: OutlineButton(
+                    splashColor: Colors.lightGreenAccent,
+                   onPressed: () {
+                     print('Connect BTN Pressed');
+                     Navigator.pushNamed(context, 'commandPage', arguments: mdl[i]);
+                   },
+                    child: Text('Connect'),
+                  ),
                 ),
               ),
               actions: <Widget>[
