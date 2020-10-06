@@ -7,7 +7,6 @@ import '../helpers/database_helpers.dart';
 import '../main.dart';
 import 'dart:math';
 import '../helpers/HaasMDC.dart';
-import '../helpers/Overlay_helpers.dart';
 
 class CommandPage extends StatefulWidget {
   @override
@@ -64,8 +63,6 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
   Widget build(BuildContext context) {
     this.md = ModalRoute.of(context).settings.arguments;
     this.mdc = new HaasMDC(md.connectionName, md.port);
-
-    final overlay = LoadingOverlay.of(context);
 
 
     return Scaffold(
