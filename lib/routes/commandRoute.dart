@@ -86,21 +86,34 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
                   child: Text('Get Tool Offsets'),
                   onPressed: () {
                     print('getting tool offsets');
-                    mdc.getToolOffsets(2).then((value) {
-                      wlist.add(
-                        ListView.builder(
-                          itemCount: value == null ? 0 : value.length,
-                          itemBuilder: (context, int i) =>
-                         ListTile(
-                           title: Text('test $value[i]'),
-                         )
-                        )
-                      );
-                    });
-                    wlist.add(Text('test'));
-                    setState(() {
 
-                    });
+                    _go()async {
+                      await mdc.getToolOffsets(2).then((value) {
+                        print(value);
+                        print('itemcount ${value.length}');
+                        wlist.add(
+                          Container(
+                            child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: value == null ? 0 : value.length,
+                                itemBuilder: (context, int i) {
+                                 return ListTile(
+                                      title: Text('test X:${value[i].x}'),
+                                    );
+
+                                }
+                            ),
+                          )
+                        );
+
+                      });
+                      setState(() {});
+                    }
+
+                    _go();
+
+
                   },
                 )
               ]+wlist,
