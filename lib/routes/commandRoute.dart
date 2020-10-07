@@ -88,7 +88,7 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
                     print('getting tool offsets');
 
                     _go()async {
-                      await mdc.getToolOffsets(2).then((value) {
+                      await mdc.getToolOffsets(10).then((value) {
                         print(value);
                         print('itemcount ${value.length}');
                         wlist.add(
@@ -97,7 +97,7 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
                                 scrollDirection: Axis.vertical,
                                 shrinkWrap: true,
                                 itemCount: value == null ? 0 : value.length,
-                                itemBuilder: (context, int i) {
+                                itemBuilder: (context, i) {
                                  return ListTile(
                                       title: Text('test X:${value[i].x}'),
                                     );
