@@ -54,11 +54,8 @@ class EditMachine extends StatelessWidget {
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter Hostname or IP';
-              } else if (!isAlphanumeric(value)) {
-                if (!isIP(value)) {
-                  return "Invalid IP Address";
-                }
-                return "Hostname must be Alpha Numeric";
+              } else if (!isIP(value)) {
+                return "Invalid IP Address";
               }
               return null;
             },
@@ -111,14 +108,13 @@ class EditMachine extends StatelessWidget {
                     // otherwise.
                     if (_formKey.currentState.validate()) {
                       // If the form is valid, display a Snackbar.
-                      Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text('Processing Data')));
+
 
                       ////////
 
                       _save() async {
                         MachineData md = MachineData();
-                        md.sn = Random().nextInt(1000);
+                        md.sn = 123;
                         md.nickname = nicknameController.text;
                         md.connectionName = hostController.text;
                         md.port = int.parse(portController.text);
@@ -128,9 +124,7 @@ class EditMachine extends StatelessWidget {
                         int id = await helper.insertMachineData(md);
                         print('inserted row: $id');
                       }
-                      _save().then((value) => {
-                        Navigator.pop(context, true)
-                      });
+                      _save().then((value) => {Navigator.pop(context, true)});
 
                       ////////
                     }

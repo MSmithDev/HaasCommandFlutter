@@ -12,6 +12,7 @@ extension StringExtensions on String {
 
 class HaasMDC {
 
+  bool connected = false;
   Socket sock;
   String host;
   int port;
@@ -28,6 +29,9 @@ class HaasMDC {
 
   }
 
+  bool isConnected(){
+    return connected;
+  }
 
   Future<bool> connect() async {
   try {
@@ -39,6 +43,7 @@ class HaasMDC {
     if(sock != null) {
       tests = Utf8Decoder().bind(sock).transform(LineSplitter());
       events = StreamQueue<String>(tests);
+      connected = true;
       return true; //<------ on connect return true to connect()
     }
     else {
@@ -51,6 +56,11 @@ class HaasMDC {
 
   Future<String>sendRecv(String cmd) async {
     sock.writeln(cmd);
+    return await events.next;
+  }
+
+  Future<String>getSerialNumber() async {
+    sock.writeln('?Q100');
     return await events.next;
   }
 

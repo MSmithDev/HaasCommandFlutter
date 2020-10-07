@@ -222,7 +222,7 @@ class MyCustomFormState extends State<SecondRoute> {
 
                       _save() async {
                         MachineData md = MachineData();
-                        md.sn = Random().nextInt(1000);
+                        md.sn = 123;
                         md.nickname = nicknameController.text;
                         md.connectionName = hostController.text;
                         md.port = int.parse(portController.text);

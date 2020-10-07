@@ -27,6 +27,9 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
   MachineData md;
   HaasMDC mdc;
 
+  List<StatelessWidget> wlist = new List();
+
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -62,8 +65,9 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     this.md = ModalRoute.of(context).settings.arguments;
-    this.mdc = new HaasMDC(md.connectionName, md.port);
-
+    if(mdc == null) {
+      this.mdc = new HaasMDC(md.connectionName, md.port);
+    }
 
     return Scaffold(
     appBar: AppBar(
@@ -75,7 +79,32 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
       future: stuff(),
       builder: (context, AsyncSnapshot<String> snapshot) {
         if(snapshot.hasData) {
-          return Text(snapshot.data);
+          return Column(
+              children: [
+                Text(snapshot.data),
+                RaisedButton(
+                  child: Text('Get Tool Offsets'),
+                  onPressed: () {
+                    print('getting tool offsets');
+                    mdc.getToolOffsets(2).then((value) {
+                      wlist.add(
+                        ListView.builder(
+                          itemCount: value == null ? 0 : value.length,
+                          itemBuilder: (context, int i) =>
+                         ListTile(
+                           title: Text('test $value[i]'),
+                         )
+                        )
+                      );
+                    });
+                    wlist.add(Text('test'));
+                    setState(() {
+
+                    });
+                  },
+                )
+              ]+wlist,
+          );
         }else if (snapshot.hasError){
 
          return Text('ERROR has occored',textScaleFactor: 1.5,);
@@ -107,12 +136,18 @@ class _CommandPageState extends State<CommandPage> with RouteAware {
   }
   
   Future<String> stuff() async {
-    await Future.delayed(Duration(seconds: 5), () {
+    if(!mdc.isConnected()) {
+      await mdc.connect();
+    }
+    return await mdc.getSerialNumber();
 
-    });
-    return Future.error("");
 
     //return 'its done';
+  }
+
+
+  Future<String> getOff() async {
+    return await mdc.getToolOffsets(2).toString();
   }
 }
 

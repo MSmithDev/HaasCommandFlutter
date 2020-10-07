@@ -14,14 +14,12 @@ final String columnSoftwareVersion = 'software';
 
 // data model class
 class MachineData {
-
   int sn;
   String nickname;
   String connectionName;
   int port;
   String model;
   String softwareVersion;
-
 
   MachineData();
 
@@ -54,18 +52,20 @@ class MachineData {
 
 // singleton class to manage the database
 class DatabaseHelper {
-
   // This is the actual database filename that is saved in the docs directory.
   static final _databaseName = "HaasCommand.db";
+
   // Increment this version when you need to change the schema.
   static final _databaseVersion = 1;
 
   // Make this a singleton class.
   DatabaseHelper._privateConstructor();
+
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
 
   // Only allow a single open connection to the database.
   static Database _database;
+
   Future<Database> get database async {
     if (_database != null) return _database;
     _database = await _initDatabase();
@@ -79,8 +79,7 @@ class DatabaseHelper {
     String path = join(documentsDirectory.path, _databaseName);
     // Open the database. Can also add an onUpdate callback parameter.
     return await openDatabase(path,
-        version: _databaseVersion,
-        onCreate: _onCreate);
+        version: _databaseVersion, onCreate: _onCreate);
   }
 
   // SQL string to create the database
@@ -101,14 +100,30 @@ class DatabaseHelper {
 
   Future<int> insertMachineData(MachineData data) async {
     Database db = await database;
-    int id = await db.insert(machineDataTable, data.toMap());
+    int id = 0;
+
+    try {
+      print('attempting db write');
+      id = await db.insert(machineDataTable, data.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      print('Database error $e');
+    }
+
     return id;
   }
 
   Future<MachineData> queryMachineData(int id) async {
     Database db = await database;
     List<Map> maps = await db.query(machineDataTable,
-        columns: [columnSn, columnNickname, columnConnectionName, columnPort, columnModel, columnSoftwareVersion],
+        columns: [
+          columnSn,
+          columnNickname,
+          columnConnectionName,
+          columnPort,
+          columnModel,
+          columnSoftwareVersion
+        ],
         where: '$columnSn = ?',
         whereArgs: [id]);
     if (maps.length > 0) {
@@ -128,15 +143,12 @@ class DatabaseHelper {
     return null;
   }
 
-
   Future<int> removeMachine(MachineData md) async {
     Database db = await database;
     print('removing ${md}');
-   return await db.delete(machineDataTable, where: '$columnSn = ?', whereArgs: [md.sn]);
+    return await db
+        .delete(machineDataTable, where: '$columnSn = ?', whereArgs: [md.sn]);
   }
-
-
-
 
 // TODO: queryAllWords()
 // TODO: delete(int id)
